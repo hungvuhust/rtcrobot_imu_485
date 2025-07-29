@@ -3,4 +3,6 @@ vrobot_imu:
     serial_port: "/dev/imu"
     serial_baud: 9600
     serial_timeout: 1000
-    topic_name: "/imu" 
+    topic_name: "/imu"
+    base_link_frame: "base_link"
+    imu_link_frame: "imu_link" 

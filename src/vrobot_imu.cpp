@@ -16,17 +16,25 @@ VrobotIMU::VrobotIMU() : Node("vrobot_imu") {
   this->declare_parameter("serial_baud", 9600);
   this->declare_parameter("serial_timeout", 1000);
   this->declare_parameter("topic_name", std::string("/imu"));
+  this->declare_parameter("base_link_frame", std::string("base_link"));
+  this->declare_parameter("imu_link_frame", std::string("imu_link"));
 
   // Get parameters
-  serial_port_    = this->get_parameter("serial_port").as_string();
-  serial_baud_    = this->get_parameter("serial_baud").as_int();
-  serial_timeout_ = this->get_parameter("serial_timeout").as_int();
-  topic_name_     = this->get_parameter("topic_name").as_string();
+  serial_port_     = this->get_parameter("serial_port").as_string();
+  serial_baud_     = this->get_parameter("serial_baud").as_int();
+  serial_timeout_  = this->get_parameter("serial_timeout").as_int();
+  topic_name_      = this->get_parameter("topic_name").as_string();
+  base_link_frame_ = this->get_parameter("base_link_frame").as_string();
+  imu_link_frame_  = this->get_parameter("imu_link_frame").as_string();
 
   RCLCPP_INFO(this->get_logger(), "Serial port: %s", serial_port_.c_str());
   RCLCPP_INFO(this->get_logger(), "Serial baud: %d", serial_baud_);
   RCLCPP_INFO(this->get_logger(), "Serial timeout: %d ms", serial_timeout_);
   RCLCPP_INFO(this->get_logger(), "Topic name: %s", topic_name_.c_str());
+  RCLCPP_INFO(this->get_logger(), "Base link frame: %s",
+              base_link_frame_.c_str());
+  RCLCPP_INFO(this->get_logger(), "IMU link frame: %s",
+              imu_link_frame_.c_str());
 
   imu_pub_ = create_publisher<Imu>(topic_name_, 10);
 
@@ -74,8 +82,8 @@ void VrobotIMU::thread_poll() {
     if (!is_init_) {
       geometry_msgs::msg::TransformStamped transform;
       try {
-        transform = tf_buffer_->lookupTransform("base_link", "imu_link",
-                                                tf2::TimePointZero);
+        transform = tf_buffer_->lookupTransform(
+            base_link_frame_, imu_link_frame_, tf2::TimePointZero);
 
         quaternion_.setValue(
             transform.transform.rotation.x, transform.transform.rotation.y,
@@ -137,7 +145,7 @@ void VrobotIMU::thread_poll() {
 
       sensor_msgs::msg::Imu imu_msg;
       imu_msg.header.stamp    = this->now();
-      imu_msg.header.frame_id = "base_link";
+      imu_msg.header.frame_id = base_link_frame_;
 
       imu_msg.linear_acceleration.x = acc_base.x() - acc_bias_[0];
       imu_msg.linear_acceleration.y = acc_base.y() - acc_bias_[1];

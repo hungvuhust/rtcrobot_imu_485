@@ -44,6 +44,8 @@ private:
   int         serial_baud_;
   int         serial_timeout_;
   std::string topic_name_;
+  std::string base_link_frame_;
+  std::string imu_link_frame_;
 
   // Serial
   static std::unique_ptr<serial::Serial> serial_;
