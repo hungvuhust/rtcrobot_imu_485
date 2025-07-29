@@ -127,6 +127,14 @@ void VrobotIMU::thread_poll() {
       tf2::Vector3 acc_base =
           rot_matrix_ * acc_imu; // Transform to base_link frame
 
+      if (!is_bias_set_) {
+        acc_bias_[0] = acc_base.x();
+        acc_bias_[1] = acc_base.y();
+        acc_bias_[2] = acc_base.z();
+        is_bias_set_ = true;
+        RCLCPP_INFO(this->get_logger(), "Bias set");
+      }
+
       sensor_msgs::msg::Imu imu_msg;
       imu_msg.header.stamp    = this->now();
       imu_msg.header.frame_id = "base_link";

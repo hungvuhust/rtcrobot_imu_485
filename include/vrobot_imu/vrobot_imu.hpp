@@ -55,7 +55,8 @@ private:
   double angle_[3];
   double mag_[3];
 
-  double acc_bias_[3] = {5.42756348e-02, 3.49316406e-03, 0.0};
+  double           acc_bias_[3] = {5.42756348e-02, 3.49316406e-03, 0.0};
+  std::atomic_bool is_bias_set_{false};
 
   // Thread
   std::unique_ptr<std::thread> thread_;
