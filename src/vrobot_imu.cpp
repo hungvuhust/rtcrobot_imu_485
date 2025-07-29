@@ -11,15 +11,32 @@ std::unique_ptr<serial::Serial> VrobotIMU::serial_ = nullptr;
 std::atomic<uint8_t>            VrobotIMU::flag_   = 0;
 
 VrobotIMU::VrobotIMU() : Node("vrobot_imu") {
-  imu_pub_ = create_publisher<Imu>(TOPIC_NAME, 10);
+  // Declare parameters with default values
+  this->declare_parameter("serial_port", std::string("/dev/imu"));
+  this->declare_parameter("serial_baud", 9600);
+  this->declare_parameter("serial_timeout", 1000);
+  this->declare_parameter("topic_name", std::string("/imu"));
+
+  // Get parameters
+  serial_port_    = this->get_parameter("serial_port").as_string();
+  serial_baud_    = this->get_parameter("serial_baud").as_int();
+  serial_timeout_ = this->get_parameter("serial_timeout").as_int();
+  topic_name_     = this->get_parameter("topic_name").as_string();
+
+  RCLCPP_INFO(this->get_logger(), "Serial port: %s", serial_port_.c_str());
+  RCLCPP_INFO(this->get_logger(), "Serial baud: %d", serial_baud_);
+  RCLCPP_INFO(this->get_logger(), "Serial timeout: %d ms", serial_timeout_);
+  RCLCPP_INFO(this->get_logger(), "Topic name: %s", topic_name_.c_str());
+
+  imu_pub_ = create_publisher<Imu>(topic_name_, 10);
 
   tf_buffer_   = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   if (!serial_) {
     serial_ = std::make_unique<serial::Serial>(
-        SERIAL_PORT, SERIAL_BAUD,
-        serial::Timeout::simpleTimeout(SERIAL_TIMEOUT));
+        serial_port_, serial_baud_,
+        serial::Timeout::simpleTimeout(serial_timeout_));
   }
 
   if (!serial_->isOpen()) {

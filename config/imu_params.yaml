@@ -1,0 +1,6 @@
+vrobot_imu:
+  ros__parameters:
+    serial_port: "/dev/imu"
+    serial_baud: 9600
+    serial_timeout: 1000
+    topic_name: "/imu" 

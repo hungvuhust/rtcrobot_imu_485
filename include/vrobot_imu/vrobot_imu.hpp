@@ -39,6 +39,12 @@ private:
   tf2::Matrix3x3  rot_matrix_;
   tf2::Quaternion quaternion_;
 
+  // Serial parameters
+  std::string serial_port_;
+  int         serial_baud_;
+  int         serial_timeout_;
+  std::string topic_name_;
+
   // Serial
   static std::unique_ptr<serial::Serial> serial_;
   static std::atomic<uint8_t>            flag_;
