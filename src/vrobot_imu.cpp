@@ -119,26 +119,25 @@ void VrobotIMU::thread_poll() {
       mag_[2] = sReg[HZ];
 
       tf2::Quaternion q_imu;
-      q_imu.setRPY(angle_[1], angle_[0], angle_[2]); // Quaternion from IMU
+      q_imu.setRPY(angle_[0], angle_[1], angle_[2]); // Quaternion from IMU
 
       tf2::Quaternion q_base = quaternion_; // Quaternion from base_link
       q_base *= q_imu; // Quaternion from base_link * Quaternion from IMU
       q_base.normalize();
 
       // Transform angular velocity
-      tf2::Vector3 angular_velocity_imu(gyr_[1], gyr_[0], gyr_[2]);
+      tf2::Vector3 angular_velocity_imu(gyr_[0], gyr_[1], gyr_[2]);
       tf2::Vector3 angular_velocity_base =
           rot_matrix_ * angular_velocity_imu; // Transform to base_link frame
 
       // Transform acceleration
-      tf2::Vector3 acc_imu(acc_[1], acc_[0], acc_[2]);
+      tf2::Vector3 acc_imu(acc_[0], acc_[1], acc_[2]);
       tf2::Vector3 acc_base =
           rot_matrix_ * acc_imu; // Transform to base_link frame
 
       if (!is_bias_set_) {
         acc_bias_[0] = acc_base.x();
         acc_bias_[1] = acc_base.y();
-        acc_bias_[2] = acc_base.z();
         is_bias_set_ = true;
         RCLCPP_INFO(this->get_logger(), "Bias set");
       }
@@ -149,7 +148,7 @@ void VrobotIMU::thread_poll() {
 
       imu_msg.linear_acceleration.x = acc_base.x() - acc_bias_[0];
       imu_msg.linear_acceleration.y = acc_base.y() - acc_bias_[1];
-      imu_msg.linear_acceleration.z = acc_base.z() - acc_bias_[2];
+      imu_msg.linear_acceleration.z = acc_base.z();
 
       imu_msg.angular_velocity.x = angular_velocity_base.x();
       imu_msg.angular_velocity.y = angular_velocity_base.y();
